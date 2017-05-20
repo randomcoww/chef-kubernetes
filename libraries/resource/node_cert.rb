@@ -9,7 +9,7 @@ class ChefKubernetes
       private
 
       def to_conf
-        generator.node_cert(name, alt_names).to_pem
+        generator.node_cert(cn, alt_names).to_pem
       end
     end
   end

@@ -8,7 +8,7 @@ class ChefKubernetes
       private
 
       def to_conf
-        generator.node_key(name).to_pem
+        generator.node_key(cn).to_pem
       end
     end
   end

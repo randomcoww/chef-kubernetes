@@ -8,7 +8,7 @@ class ChefKubernetes
       private
 
       def to_conf
-        generator.admin_cert(name).to_pem
+        generator.admin_cert(cn).to_pem
       end
     end
   end

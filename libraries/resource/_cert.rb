@@ -12,9 +12,10 @@ class ChefKubernetes
       property :data_bag_item, String
 
       property :root_cn, String, default: 'kube-ca'
+      property :cn, String
       property :content, String
       property :path, String, desired_state: false,
-                              default: lazy { ::File.join(KubernetesCert::BASE_PATH, "#{name}.pem") }
+                              default: lazy { ::File.join(KubernetesCert::BASE_PATH, name) }
 
 
       def provider
