@@ -25,7 +25,7 @@ class ChefKubernetes
       private
 
       def generator
-        Generator.new(data_bag, data_bag_item, root_cn)
+        KubernetesCert::CertGenerator.new(data_bag, data_bag_item, root_cn)
       end
     end
   end

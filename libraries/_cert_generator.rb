@@ -2,7 +2,7 @@ module KubernetesCert
 
   BASE_PATH ||= '/etc/kubernetes/ssl'
 
-  class Generator
+  class CertGenerator
     attr_reader :dbag, :root_cn
 
     include Dbag
@@ -43,7 +43,7 @@ module KubernetesCert
         @root_ca.public_key = root_key.public_key
 
         @root_ca.not_before = Time.new
-        @root_ca.not_after = ca.not_before + 63072000
+        @root_ca.not_after = @root_ca.not_before + 63072000
 
         @root_ca.sign(root_key, OpenSSL::Digest::SHA256.new)
 
@@ -71,11 +71,12 @@ module KubernetesCert
         cert.public_key = node_key(cn).public_key
 
         cert.not_before = Time.new
-        cert.not_after = ca.not_before + 63072000
+        cert.not_after = cert.not_before + 63072000
 
         ef = OpenSSL::X509::ExtensionFactory.new
         ef.subject_certificate = cert
         ef.issuer_certificate = root_ca
+        ef.config = OpenSSL::Config.load(OpenSSL::Config::DEFAULT_CONFIG_FILE)
         ef.config['alt_names'] = alt_names
 
         cert.add_extension(ef.create_extension("basicConstraints", "CA:FALSE", true))
@@ -108,7 +109,7 @@ module KubernetesCert
         cert.public_key = node_key(cn).public_key
 
         cert.not_before = Time.new
-        cert.not_after = ca.not_before + 63072000
+        cert.not_after = cert.not_before + 63072000
 
         cert.sign(root_key, OpenSSL::Digest::SHA256.new)
         return cert

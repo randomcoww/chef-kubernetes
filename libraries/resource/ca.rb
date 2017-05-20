@@ -1,7 +1,7 @@
 class ChefKubernetes
   class Resource
     class Ca < ChefKubernetes::Resource::Cert
-      resource_name :kubernetes_cert
+      resource_name :kubernetes_ca
 
       property :content, String, default: lazy { to_conf }
 
