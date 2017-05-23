@@ -3,14 +3,13 @@ class ChefKubernetes
     class NodeCert < ChefKubernetes::Resource::Cert
       resource_name :kubernetes_node_cert
 
-      property :content, String, default: lazy { to_conf }
-      property :alt_names, Hash
+      property :extensions, Hash, default: {
+        "basicConstraints" => "CA:FALSE",
+        "keyUsage" => 'nonRepudiation, digitalSignature, keyEncipherment',
+        "subjectAltName" => '@alt_names'
+      }
 
-      private
-
-      def to_conf
-        generator.node_cert(cn, alt_names).to_pem
-      end
+      property :generate_type, String, default: 'node_cert'
     end
   end
 end

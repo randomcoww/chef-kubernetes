@@ -1,14 +1,24 @@
 class ChefKubernetes
   class Resource
-    class Ca < ChefKubernetes::Resource::Cert
+    class Ca < Chef::Resource
       resource_name :kubernetes_ca
 
-      property :content, String, default: lazy { to_conf }
+      default_action :create
+      allowed_actions :create, :create_if_missing
+
+      property :data_bag, String
+      property :data_bag_item, String
+
+      property :cert_path, String, desired_state: false,
+                              default: lazy { ::File.join(KubernetesCert::BASE_PATH , "#{name}.crt") }
+
+      property :cert, [String,NilClass], default: lazy { generator.root_ca.to_pem }
+
 
       private
 
-      def to_conf
-        generator.root_ca.to_pem
+      def generator
+        KubernetesCert::CertGenerator.new(data_bag, data_bag_item)
       end
     end
   end
