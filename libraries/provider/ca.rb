@@ -27,7 +27,7 @@ class ChefKubernetes
       end
 
       def action_create
-        if current_resource.cert != new_resource.cert
+        if current_resource.cert != new_resource.cert.chomp
 
           converge_by("Create Kubernetes cert file: #{new_resource}") do
             create_base_path
