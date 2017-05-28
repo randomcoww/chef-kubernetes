@@ -4,7 +4,7 @@ class ChefKubernetes
       resource_name :kubernetes_cert
 
       default_action :create_if_missing
-      allowed_actions :create_if_missing
+      allowed_actions :create_if_missing, :create
 
       property :data_bag, String
       property :data_bag_item, String

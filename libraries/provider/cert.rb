@@ -9,22 +9,25 @@ class ChefKubernetes
       end
 
 
+      def action_create
+        converge_by("Create Kubernetes cert file: #{new_resource}") do
+          create_base_path
+
+          key = generator.generate_key
+          cert = generator.node_cert(
+            new_resource.cn,
+            key,
+            new_resource.extensions,
+            new_resource.alt_names)
+
+          write_files(key.to_pem, cert.to_pem)
+        end
+      end
+
       def action_create_if_missing
         if !::File.exist?(new_resource.key_path) ||
           !::File.exist?(new_resource.cert_path)
-
-          converge_by("Create Kubernetes cert file: #{new_resource}") do
-            create_base_path
-
-            key = generator.generate_key
-            cert = generator.node_cert(
-              new_resource.cn,
-              key,
-              new_resource.extensions,
-              new_resource.alt_names)
-
-            write_files(key.to_pem, cert.to_pem)
-          end
+          action_create
         end
       end
 
