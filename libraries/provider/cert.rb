@@ -16,7 +16,7 @@ class ChefKubernetes
           converge_by("Create Kubernetes cert file: #{new_resource}") do
             create_base_path
 
-            key = generator.key
+            key = generator.generate_key
             cert = generator.node_cert(
               new_resource.cn,
               key,

@@ -12,57 +12,43 @@ module KubernetesCert
     end
 
 
-    def root_key
-      return @root_key unless @root_key.nil?
-
-      key_pem = dbag.get('root_key')
-
-      if !key_pem.nil?
-        @root_key = OpenSSL::PKey::RSA.new(key_pem)
-        return @root_key
-
-      else
-        @root_key = OpenSSL::PKey::RSA.new(2048)
-        dbag.put('root_key', @root_key.to_pem)
-
-        return @root_key
-      end
+    def generate_key
+      OpenSSL::PKey::RSA.new(2048)
     end
+
 
     def root_ca
       return @root_ca unless @root_ca.nil?
 
-      ca_pem = dbag.get('root_ca')
+      k = get_or_create_dbag('kube-ca') {
+        ca = OpenSSL::X509::Certificate.new
+        ca.version = 2
+        ca.serial = 1
 
-      if !ca_pem.nil?
-        @root_ca = OpenSSL::X509::Certificate.new(ca_pem)
-        return @root_ca
-
-      else
-        @root_ca = OpenSSL::X509::Certificate.new
-        @root_ca.version = 2
-        @root_ca.serial = 1
-
-        @root_ca.subject = OpenSSL::X509::Name.new([
-          ["CN", 'root_ca']
+        ca.subject = OpenSSL::X509::Name.new([
+          ["CN", 'kube-ca']
         ])
-        @root_ca.issuer = @root_ca.subject
-        @root_ca.public_key = root_key.public_key
+        ca.issuer = ca.subject
+        ca.public_key = root_key.public_key
 
-        @root_ca.not_before = Time.new
-        @root_ca.not_after = @root_ca.not_before + 63072000
+        ca.not_before = Time.new
+        ca.not_after = ca.not_before + 63072000
 
-        @root_ca.sign(root_key, OpenSSL::Digest::SHA256.new)
+        ef = OpenSSL::X509::ExtensionFactory.new
+        ef.subject_certificate = ca
+        ef.issuer_certificate = ca
+        ca.add_extension(ef.create_extension("basicConstraints", "CA:TRUE", true))
+        ca.add_extension(ef.create_extension("keyUsage", "keyCertSign, cRLSign", true))
+        ca.add_extension(ef.create_extension("subjectKeyIdentifier", "hash", false))
+        ca.add_extension(ef.create_extension("authorityKeyIdentifier", "keyid:always", false))
 
-        dbag.put('root_ca', @root_ca.to_pem)
-        return @root_ca
-      end
+        ca.sign(root_key, OpenSSL::Digest::SHA256.new)
+        ca.to_pem
+      }
+
+      @root_ca = OpenSSL::X509::Certificate.new(k)
     end
 
-
-    def key
-      OpenSSL::PKey::RSA.new(2048)
-    end
 
     def node_cert(cn, key, extensions={}, alt_names={})
       cert = OpenSSL::X509::Certificate.new
@@ -93,6 +79,30 @@ module KubernetesCert
 
       cert.sign(root_key, OpenSSL::Digest::SHA256.new)
       return cert
+    end
+
+
+    private
+
+    def root_key
+      return @root_key unless @root_key.nil?
+
+      k = get_or_create_dbag('kube-ca-key') {
+        generate_key.to_pem
+      }
+
+      @root_key = OpenSSL::PKey::RSA.new(k)
+    end
+
+    def get_or_create_dbag(key)
+      value = dbag.get(key)
+
+      return value unless value.nil?
+
+      value = yield
+      dbag.put(key, value)
+
+      return value
     end
   end
 end
