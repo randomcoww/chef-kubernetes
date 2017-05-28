@@ -1,6 +1,6 @@
 module KubernetesCert
-
-  BASE_PATH ||= '/etc/kubernetes/ssl'
+  
+  BASE_PATH ||= '/srv/kubernetes'
 
   class CertGenerator
     attr_reader :dbag
