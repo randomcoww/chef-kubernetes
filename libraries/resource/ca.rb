@@ -10,7 +10,7 @@ class ChefKubernetes
       property :data_bag_item, String
 
       property :cert_path, String, desired_state: false,
-                              default: lazy { ::File.join(KubernetesCert::BASE_PATH , "#{name}.crt") }
+                              default: lazy { ::File.join(KubernetesHelper::BASE_PATH , "#{name}.crt") }
 
       property :cert, [String,NilClass], default: lazy { generator.root_ca.to_pem }
 
@@ -18,7 +18,7 @@ class ChefKubernetes
       private
 
       def generator
-        KubernetesCert::CertGenerator.new(data_bag, data_bag_item)
+        KubernetesHelper::CertGenerator.new(data_bag, data_bag_item)
       end
     end
   end

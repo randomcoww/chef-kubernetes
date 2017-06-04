@@ -1,6 +1,8 @@
 class ChefKubernetes
   class Provider
     class Cert < Chef::Provider
+      include OpenSSLHelper
+
       provides :kubernetes_cert, os: "linux"
 
       def load_current_resource
@@ -15,7 +17,7 @@ class ChefKubernetes
 
           key = generator.generate_key
           cert = generator.node_cert(
-            new_resource.cn,
+            [['CN', new_resource.cn]],
             key,
             new_resource.extensions,
             new_resource.alt_names)
@@ -35,7 +37,7 @@ class ChefKubernetes
       private
 
       def generator
-        KubernetesCert::CertGenerator.new(new_resource.data_bag, new_resource.data_bag_item)
+        OpenSSLHelper::CertGenerator.new(new_resource.data_bag, new_resource.data_bag_item, [['CN', new_resource.root_cn]])
       end
 
       def create_base_path

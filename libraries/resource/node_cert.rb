@@ -6,7 +6,6 @@ class ChefKubernetes
       property :extensions, Hash, default: {
         "basicConstraints" => "CA:FALSE",
         "keyUsage" => 'nonRepudiation, digitalSignature, keyEncipherment',
-        "subjectAltName" => '@alt_names'
       }
 
       property :generate_type, String, default: 'node_cert'
