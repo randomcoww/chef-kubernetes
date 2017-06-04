@@ -19,6 +19,14 @@ class ChefKubernetes
         current_resource
       end
 
+      ## "restart" trigger by force re-writing the static pod file
+      def action_restart
+        converge_by("Restart Kubernetes pod: #{new_resource}") do
+          pod_manifest.run_action(:delete) if !current_resource.content.nil?
+          pod_manifest.run_action(:create)
+        end
+      end
+
       def action_create
         converge_by("Create Kubernetes pod: #{new_resource}") do
           pod_manifest.run_action(:create)

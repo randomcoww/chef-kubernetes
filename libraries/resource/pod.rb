@@ -4,9 +4,9 @@ class ChefKubernetes
       resource_name :kubernetes_pod
 
       default_action :create
-      allowed_actions :create, :delete
+      allowed_actions :create, :delete, :restart
 
-      property :config, Hash
+      property :config, Hash, default: {}
       property :content, [String, NilClass], default: lazy { config.to_hash.to_yaml }
       property :path, String, default: lazy { name }
     end
