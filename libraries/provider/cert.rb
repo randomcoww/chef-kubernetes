@@ -1,7 +1,7 @@
 class ChefKubernetes
   class Provider
     class Cert < Chef::Provider
-      # include OpenSSLHelper
+      include OpenSSLHelper
 
       provides :kubernetes_cert, os: "linux"
 
@@ -19,7 +19,7 @@ class ChefKubernetes
           cert = generator.node_cert(
             new_resource.subject,
             key,
-            new_resource.extensions,
+            new_resource.extensions.to_hash.dup,
             new_resource.alt_names)
 
           write_files(key.to_pem, cert.to_pem)
