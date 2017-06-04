@@ -9,8 +9,12 @@ class ChefKubernetes
       property :data_bag, String
       property :data_bag_item, String
 
-      property :root_cn, String, default: 'kube-ca'
+      property :root_subject, Array, desired_state: false,
+                              default: lazy { KubernetesHelper::ROOT_SUBJECT }
       property :cn, String
+      property :subject, Array, desired_state: false,
+                              default: lazy { [['CN', cn]] }
+
       property :alt_names, Hash, default: {}
       property :extensions, Hash, default: {}
 

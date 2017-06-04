@@ -1,6 +1,8 @@
 class ChefKubernetes
   class Resource
     class Ca < Chef::Resource
+      include OpenSSLHelper
+
       resource_name :kubernetes_ca
 
       default_action :create
@@ -9,6 +11,8 @@ class ChefKubernetes
       property :data_bag, String
       property :data_bag_item, String
 
+      property :root_subject, Array, desired_state: false,
+                              default: lazy { KubernetesHelper::ROOT_SUBJECT }
       property :cert_path, String, desired_state: false,
                               default: lazy { ::File.join(KubernetesHelper::BASE_PATH , "#{name}.crt") }
 
@@ -18,7 +22,7 @@ class ChefKubernetes
       private
 
       def generator
-        KubernetesHelper::CertGenerator.new(data_bag, data_bag_item)
+        OpenSSLHelper::CertGenerator.new(data_bag, data_bag_item, root_subject)
       end
     end
   end
